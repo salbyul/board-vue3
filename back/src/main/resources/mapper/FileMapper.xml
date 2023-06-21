@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.boardvue3.repository.file.FileMapper">
+
+    <select id="findFileNamesByBoardId" resultType="String">
+        SELECT real_name AS fileName
+        FROM file
+        where board_id = #{boardId}
+    </select>
+
+    <select id="findFileNameByRealName" resultType="String">
+        SELECT name AS fileName
+        FROM file
+        WHERE real_name = #{realName} and board_id = #{boardId}
+    </select>
+</mapper>
