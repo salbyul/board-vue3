@@ -65,4 +65,15 @@
         SET views = views + 1
         WHERE board_id = #{boardId}
     </update>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="boardId">
+        INSERT INTO board (category_id, writer, title, password, content, created_date, views)
+        VALUES (#{categoryId}, #{writer}, #{title}, #{encryptedPassword}, #{content}, #{generationTimestamp}, 0)
+    </insert>
+
+    <delete id="deleteBoardByBoardId">
+        DELETE
+        FROM board
+        WHERE board_id = #{boardId}
+    </delete>
 </mapper>

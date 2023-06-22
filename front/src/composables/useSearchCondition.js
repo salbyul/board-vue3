@@ -46,4 +46,12 @@ const makeDate = (date) => {
 
 conditionInit();
 
+export const condition = ref({
+    startDate: startDate.value,
+    endDate: endDate.value,
+    categoryId: categoryId.value,
+    searchText: searchText.value,
+    page: page.value
+})
+
 export {startDate, endDate, categoryId, searchText, page, limit}

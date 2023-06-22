@@ -2,19 +2,18 @@ package com.study.boardvue3.controller;
 
 import com.study.boardvue3.dto.BoardDTO;
 import com.study.boardvue3.dto.CategoryDTO;
-import com.study.boardvue3.dto.CommentDTO;
 import com.study.boardvue3.dto.SearchCondition;
 import com.study.boardvue3.response.APIResponse;
 import com.study.boardvue3.service.BoardService;
 import com.study.boardvue3.service.CommentService;
+import com.study.boardvue3.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static com.study.boardvue3.dto.BoardDTO.*;
@@ -26,6 +25,7 @@ public class BoardController {
 
     private final BoardService boardService;
     private final CommentService commentService;
+    private final FileService fileService;
 
     /**
      * 전체 카테고리를 반환한다.
@@ -90,16 +90,15 @@ public class BoardController {
                 .build();
     }
 
-//    TODO: 받아오는 것 까지 확인 완료 이제 저장하는 로직 작성, 에러 핸들링
+//    TODO: result에 boardId 하나 넘기는 거 불편
     @PostMapping("/board/create")
-    public APIResponse createBoard(@RequestPart("boardDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) {
-        System.out.println("boardCreateDTO = " + boardCreateDTO);
-        for (MultipartFile file : files) {
-            System.out.println("file.getOriginalFilename() = " + file.getOriginalFilename());
-        }
+    public APIResponse createBoard(@RequestPart("boardDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+        Long boardId = boardService.saveBoard(boardCreateDTO);
+        fileService.saveFiles(files, boardId);
         return APIResponse.builder()
                 .code(201)
                 .message("ok")
+                .result(boardId)
                 .build();
     }
 }

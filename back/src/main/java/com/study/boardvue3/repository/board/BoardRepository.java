@@ -6,6 +6,8 @@ import com.study.boardvue3.dto.SearchCondition;
 
 import java.util.List;
 
+import static com.study.boardvue3.dto.BoardDTO.*;
+
 public interface BoardRepository {
 
     /**
@@ -42,7 +44,22 @@ public interface BoardRepository {
     /**
      * board의 views를 1 더한다.
      *
-     * @param boardId
+     * @param boardId 게시글의 primary key
      */
     void addOneToViews(Long boardId);
+
+    /**
+     * boardCreateDTO에 담긴 데이터를 DB에 저장한 후, 해당 레코드의 primary key를 반환한다.
+     *
+     * @param boardCreateDTO 저장하기 위한 게시글의 데이터가 담긴 객체
+     * @return
+     */
+    Long save(BoardCreateDTO boardCreateDTO);
+
+    /**
+     * DB에서 boardId를 primary key로 갖는 레코드를 제거한다.
+     *
+     * @param boardId 해당 게시글의 primary key
+     */
+    void deleteBoardByBoardId(Long boardId);
 }

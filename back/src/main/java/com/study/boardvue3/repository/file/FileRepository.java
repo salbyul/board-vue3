@@ -1,5 +1,7 @@
 package com.study.boardvue3.repository.file;
 
+import com.study.boardvue3.dto.FileDTO;
+
 import java.util.List;
 
 public interface FileRepository {
@@ -20,4 +22,11 @@ public interface FileRepository {
      * @return
      */
     String findFileNameByRealName(String realName, Long boardId);
+
+    /**
+     * fileDTO에 담긴 데이터들을 DB에 저장한다.
+     *
+     * @param fileDTO 데이터가 담긴 객체
+     */
+    void save(FileDTO fileDTO);
 }

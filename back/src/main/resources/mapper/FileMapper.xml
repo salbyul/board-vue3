@@ -15,4 +15,9 @@
         FROM file
         WHERE real_name = #{realName} and board_id = #{boardId}
     </select>
+
+    <insert id="save">
+        INSERT INTO file (name, real_name, board_id)
+        VALUES (#{fileName}, #{realName}, #{boardId})
+    </insert>
 </mapper>

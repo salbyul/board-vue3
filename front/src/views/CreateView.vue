@@ -15,8 +15,11 @@ import {
 } from "../composables/useHandlingBoardData";
 import {getCategories, saveBoard} from "../api/board";
 import {onBeforeMount, ref} from "vue";
+import {useRouter} from "vue-router";
+import {condition} from "../composables/useSearchCondition";
 
 const categories = ref([]);
+const router = useRouter();
 
 const fetchCategories = async () => {
   try {
@@ -29,11 +32,20 @@ const fetchCategories = async () => {
 
 const submitBoard = async () => {
   if (!verifyCreate()) return;
-  const formData = makeFormData();
 
   try {
+    const formData = makeFormData();
     const data = await saveBoard(formData);
-    console.log(data);
+    console.log(data)
+    await router.push({
+      name: 'detail',
+      params: {
+        id: data.result
+      },
+      query: {
+        condition: condition.value
+      }
+    })
   } catch (error) {
     console.log(error)
   }

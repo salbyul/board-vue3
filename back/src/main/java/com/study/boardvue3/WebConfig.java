@@ -1,6 +1,9 @@
 package com.study.boardvue3;
 
-import com.study.boardvue3.filter.URIFilter;
+import com.study.boardvue3.encoder.Encryptor;
+import com.study.boardvue3.encoder.SHA256Encryptor;
+import com.study.boardvue3.filter.LoggingURIFilter;
+import com.study.boardvue3.validator.BoardValidator;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,10 +30,26 @@ public class WebConfig implements WebMvcConfigurer {
 
     /**
      * URIFilter 등록
+     *
      * @return
      */
     @Bean
-    public FilterRegistrationBean<URIFilter> URIFilter() {
-        return new FilterRegistrationBean<URIFilter>(new URIFilter());
+    public FilterRegistrationBean<LoggingURIFilter> URIFilter() {
+        return new FilterRegistrationBean<LoggingURIFilter>(new LoggingURIFilter());
+    }
+
+    /**
+     * SHA256Encryptor Bean으로 등록
+     *
+     * @return
+     */
+    @Bean
+    public Encryptor sha256Encryptor() {
+        return new SHA256Encryptor();
+    }
+
+    @Bean
+    public BoardValidator boardValidator() {
+        return new BoardValidator();
     }
 }

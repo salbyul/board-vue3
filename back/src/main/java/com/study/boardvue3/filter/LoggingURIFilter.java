@@ -10,7 +10,7 @@ import java.io.IOException;
  * 접속한 Method, URI를 로그로 출력한다.
  */
 @Slf4j
-public class URIFilter implements Filter {
+public class LoggingURIFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         Filter.super.init(filterConfig);
