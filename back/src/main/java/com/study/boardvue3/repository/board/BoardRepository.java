@@ -62,4 +62,12 @@ public interface BoardRepository {
      * @param boardId 해당 게시글의 primary key
      */
     void deleteBoardByBoardId(Long boardId);
+
+    /**
+     * boardId를 primary key로 갖고 있는 게시글의 비밀번호를 반환한다.
+     *
+     * @param boardId 게시글의 primary key
+     * @return
+     */
+    String findPasswordByBoardId(Long boardId);
 }

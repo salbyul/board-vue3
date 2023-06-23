@@ -1,18 +1,12 @@
 <script setup>
-import {useRouter, useRoute} from 'vue-router';
+import {useRouter} from 'vue-router';
 const props = defineProps(['board', 'condition'])
 
 const router = useRouter();
 const transferDetail = () => {
   router.push({
     path: `/board/${props.board.boardId}`,
-    query: {
-      startDate: props.condition.startDate,
-      endDate: props.condition.endDate,
-      category: props.condition.category,
-      search: props.condition.search,
-      page: props.condition.page
-    }
+    query: props.condition
   })
 }
 

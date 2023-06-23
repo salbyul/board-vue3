@@ -7,7 +7,7 @@ import com.study.boardvue3.encoder.Encryptor;
 import com.study.boardvue3.exception.BoardValidationException;
 import com.study.boardvue3.repository.board.BoardRepository;
 import com.study.boardvue3.repository.file.FileRepository;
-import com.study.boardvue3.validator.BoardValidationError;
+import com.study.boardvue3.error.BoardValidationError;
 import com.study.boardvue3.validator.BoardValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,10 +66,7 @@ public class BoardService {
      * @return
      */
     public BoardDTO getBoardDetail(Long boardId) {
-        BoardDTO boardDetail = boardRepository.findBoardDetail(boardId);
-        List<String> fileNames = fileRepository.findFileNamesByBoardId(boardId);
-        boardDetail.setFileNames(fileNames);
-        return boardDetail;
+        return boardRepository.findBoardDetail(boardId);
     }
 
     /**
@@ -90,15 +87,35 @@ public class BoardService {
      * @throws NoSuchAlgorithmException
      */
     public Long saveBoard(BoardCreateDTO boardCreateDTO) throws NoSuchAlgorithmException {
-        List<BoardValidationError> errors = boardValidator.validateBoardForSaving(boardCreateDTO);
-        if (!errors.isEmpty()) {
-            throw new BoardValidationException(errors, LocalDateTime.now());
-        }
+        boardValidator.validateBoardForSaving(boardCreateDTO);
 
         String encryptedPassword = encryptor.encrypt(boardCreateDTO.getPassword());
         boardCreateDTO.setEncryptedPassword(encryptedPassword);
         boardCreateDTO.setGenerationTimestamp(LocalDateTime.now());
-//        boardRepository.save(boardCreateDTO);
+        boardRepository.save(boardCreateDTO);
         return boardCreateDTO.getBoardId();
+    }
+
+    /**
+     * boardId를 primary key로 갖고 있는 게시글의 비밀번호와 password가 같은지 확인합니다.
+     *
+     * @param password 확인할 비밀번호
+     * @param boardId  게시글의 primary key
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public boolean isRightPassword(String password, Long boardId) throws NoSuchAlgorithmException {
+        String encryptedPassword = encryptor.encrypt(password);
+        String foundPassword = boardRepository.findPasswordByBoardId(boardId);
+        return encryptedPassword.equals(foundPassword);
+    }
+
+    /**
+     * boardId를 primary key로 갖고 있는 게시글을 DB에서 제거한다.
+     *
+     * @param boardId 게시글의 primary key
+     */
+    public void delete(Long boardId) {
+        boardRepository.deleteBoardByBoardId(boardId);
     }
 }

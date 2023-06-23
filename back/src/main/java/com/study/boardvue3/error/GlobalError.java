@@ -1,18 +1,16 @@
-package com.study.boardvue3.validator;
+package com.study.boardvue3.error;
 
 import com.study.boardvue3.response.ResponseType;
 import lombok.Getter;
 
 @Getter
-public class BoardValidationError {
+public class GlobalError implements Error {
 
     private final String code;
-    private final String field;
     private final String message;
 
-    public BoardValidationError(ResponseType responseType) {
+    public GlobalError(ResponseType responseType) {
         this.code = responseType.getCode();
-        this.field = responseType.getField();
         this.message = responseType.getMessage();
     }
 }

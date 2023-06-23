@@ -1,15 +1,29 @@
 package com.study.boardvue3.response;
 
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-// TODO: 성공시 code, message를 작성하는 것이 과연 맞나?
+import java.time.LocalDateTime;
 
 @Getter
-@Builder
-public class APIResponse<T> {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class APIResponse {
 
-    private Integer code;
-    private String message;
-    private T result;
+    private LocalDateTime timestamp;
+    private Object result;
+
+    public APIResponse setResult(Object object) {
+        result = object;
+        return this;
+    }
+
+    public APIResponse setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
+
+    public static APIResponse generateResponse() {
+        return new APIResponse();
+    }
 }

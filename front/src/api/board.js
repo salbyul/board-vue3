@@ -19,3 +19,14 @@ export function getBoardDetail(id) {
 export function saveBoard(formData) {
     return http.post('/board/create', formData)
 }
+
+export function deleteBoard(id, password) {
+    return http.delete(`/board/delete/${id}?password=${password}`)
+}
+export function passwordCheck(id, password) {
+    return http.get(`/board/password/${id}`, {params: {password}})
+}
+
+export function modifyBoard(id, form) {
+    return http.put(`/board/modify/${id}`, form)
+}

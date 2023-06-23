@@ -9,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@ToString
 public class BoardDTO {
 
     private Long boardId;
@@ -22,7 +23,7 @@ public class BoardDTO {
     private Integer fileCounts;
     private LocalDateTime generationTimestamp;
     private LocalDateTime modificationTimestamp;
-    private List<String> fileNames;
+    private List<FileDTO> fileDTOs;
     private List<CommentDTO> commentDTOs;
 
     /**
@@ -30,7 +31,6 @@ public class BoardDTO {
      */
     @Getter
     @Setter
-    @ToString
     public static class BoardCreateDTO extends BoardDTO {
 
         private Long boardId;

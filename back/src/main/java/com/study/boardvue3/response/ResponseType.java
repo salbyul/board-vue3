@@ -15,6 +15,7 @@ public enum ResponseType {
      */
 
     //    Board
+    BOARD_NULL("100", "Board", "찾을 수 없습니다."),
     CATEGORY_POSITIVE("101", "Category", "양수가 아닙니다."),
     CATEGORY_NOT_NULL("102", "Category", "값이 null입니다."),
 
@@ -27,6 +28,7 @@ public enum ResponseType {
     PASSWORD_SIZE("133", "Password", "길이 규정에 위반합니다."),
     PASSWORD_PATTERN("134", "Password", "패턴 규정에 위반합니다."),
     PASSWORD_NOT_NULL("132", "Password", "값이 null입니다."),
+    PASSWORD_WRONG("135", "Password", "잘못된 비밀번호입니다."),
 
     CONTENT_SIZE("143", "Content", "길이 규정에 위반합니다."),
     CONTENT_NOT_NULL("142", "Content", "값이 null입니다."),

@@ -1,9 +1,9 @@
 package com.study.boardvue3.validator;
 
 import com.study.boardvue3.dto.BoardDTO;
+import com.study.boardvue3.exception.BoardValidationException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,50 +13,45 @@ public class BoardValidator {
 
     private final static Pattern passwordPattern = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*\\W).{4,16}$");
 
-    public List<BoardValidationError> validateBoardForSaving(BoardDTO boardDTO) {
-        List<BoardValidationError> errors = new ArrayList<>();
-        validateCategory(boardDTO.getCategoryId(), errors);
-        validateTitle(boardDTO.getTitle(), errors);
-        validateWriter(boardDTO.getWriter(), errors);
-        validatePassword(boardDTO.getPassword(), errors);
-        validateContent(boardDTO.getContent(), errors);
-        return errors;
+    public void validateBoardForSaving(BoardDTO boardDTO) {
+        validateCategory(boardDTO.getCategoryId());
+        validateTitle(boardDTO.getTitle());
+        validateWriter(boardDTO.getWriter());
+        validatePassword(boardDTO.getPassword());
+        validateContent(boardDTO.getContent());
     }
-    private void validateCategory(Long categoryId, List<BoardValidationError> errors) {
+    private void validateCategory(Long categoryId) {
         if (categoryId < 1) {
-            errors.add(new BoardValidationError(CATEGORY_POSITIVE));
+            throw new BoardValidationException(CATEGORY_POSITIVE, LocalDateTime.now());
         }
     }
-    private void validateWriter(String writer, List<BoardValidationError> errors) {
+    private void validateWriter(String writer) {
         if (writer == null) {
-            errors.add(new BoardValidationError(WRITER_NOT_NULL));
-            return;
+            throw new BoardValidationException(WRITER_NOT_NULL, LocalDateTime.now());
         }
         if (writer.length() < 3 || writer.length() > 4) {
-            errors.add(new BoardValidationError(WRITER_SIZE));
+            throw new BoardValidationException(WRITER_SIZE, LocalDateTime.now());
         }
     }
 
-    private void validateTitle(String title, List<BoardValidationError> errors) {
+    private void validateTitle(String title) {
         if (title == null) {
-            errors.add(new BoardValidationError(TITLE_NOT_NULL));
-            return;
+            throw new BoardValidationException(TITLE_NOT_NULL, LocalDateTime.now());
         }
         if (title.length() < 4 || title.length() > 99) {
-            errors.add(new BoardValidationError(TITLE_SIZE));
+            throw new BoardValidationException(TITLE_SIZE, LocalDateTime.now());
         }
     }
 
-    private void validatePassword(String password, List<BoardValidationError> errors) {
+    private void validatePassword(String password) {
         if (password == null) {
-            errors.add(new BoardValidationError(PASSWORD_NOT_NULL));
-            return;
+            throw new BoardValidationException(PASSWORD_NOT_NULL, LocalDateTime.now());
         }
         if (password.length() < 4 || password.length() > 15) {
-            errors.add(new BoardValidationError(PASSWORD_SIZE));
+            throw new BoardValidationException(PASSWORD_SIZE, LocalDateTime.now());
         }
         if (!validatePasswordPattern(password)) {
-            errors.add(new BoardValidationError(PASSWORD_PATTERN));
+            throw new BoardValidationException(PASSWORD_PATTERN, LocalDateTime.now());
         }
     }
 
@@ -65,14 +60,13 @@ public class BoardValidator {
         return matcher.matches();
     }
 
-    private void validateContent(String content, List<BoardValidationError> errors) {
+    private void validateContent(String content) {
         if (content == null) {
-            errors.add(new BoardValidationError(CONTENT_NOT_NULL));
-            return;
+            throw new BoardValidationException(CONTENT_NOT_NULL, LocalDateTime.now());
         }
 
         if (content.length() < 4 || content.length() > 1999) {
-            errors.add(new BoardValidationError(CONTENT_SIZE));
+            throw new BoardValidationException(CONTENT_SIZE, LocalDateTime.now());
         }
     }
 }

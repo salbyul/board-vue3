@@ -4,8 +4,8 @@
 
 <mapper namespace="com.study.boardvue3.repository.file.FileMapper">
 
-    <select id="findFileNamesByBoardId" resultType="String">
-        SELECT real_name AS fileName
+    <select id="findFileNamesByBoardId" resultType="FileDTO">
+        SELECT real_name AS fileName, file_id AS fileId
         FROM file
         where board_id = #{boardId}
     </select>

@@ -19,4 +19,9 @@ public class FileDTO {
         this.realName = realName;
         this.boardId = boardId;
     }
+
+    public FileDTO(Long fileId, String realName) {
+        this.fileId = fileId;
+        this.realName = realName;
+    }
 }

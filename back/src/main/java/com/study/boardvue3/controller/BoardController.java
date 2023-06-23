@@ -1,9 +1,10 @@
 package com.study.boardvue3.controller;
 
 import com.study.boardvue3.dto.BoardDTO;
-import com.study.boardvue3.dto.CategoryDTO;
 import com.study.boardvue3.dto.SearchCondition;
+import com.study.boardvue3.exception.BoardValidationException;
 import com.study.boardvue3.response.APIResponse;
+import com.study.boardvue3.response.ResponseType;
 import com.study.boardvue3.service.BoardService;
 import com.study.boardvue3.service.CommentService;
 import com.study.boardvue3.service.FileService;
@@ -14,9 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.study.boardvue3.dto.BoardDTO.*;
+import static com.study.boardvue3.response.APIResponse.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,12 +36,10 @@ public class BoardController {
      * @return
      */
     @GetMapping("/categories")
-    public APIResponse<List<CategoryDTO>> main() {
-        return APIResponse.<List<CategoryDTO>>builder()
-                .result(boardService.getCategories())
-                .code(200)
-                .message("ok")
-                .build();
+    public APIResponse main() {
+        return generateResponse()
+                .setResult(boardService.getCategories())
+                .setTimestamp(LocalDateTime.now());
     }
 
     /**
@@ -48,13 +49,10 @@ public class BoardController {
      * @return
      */
     @GetMapping("/board/boards")
-    public APIResponse<List<BoardDTO>> getBoards(SearchCondition condition) {
-        System.out.println("condition = " + condition);
-        return APIResponse.<List<BoardDTO>>builder()
-                .result(boardService.getBoards(condition))
-                .code(200)
-                .message("ok")
-                .build();
+    public APIResponse getBoards(SearchCondition condition) {
+        return generateResponse()
+                .setResult(boardService.getBoards(condition))
+                .setTimestamp(LocalDateTime.now());
     }
 
     /**
@@ -64,14 +62,12 @@ public class BoardController {
      * @return
      */
     @GetMapping("/board/counts")
-    public APIResponse<Integer> getCounts(SearchCondition condition) {
-        return APIResponse.<Integer>builder()
-                .result(boardService.getCountOfBoards(condition))
-                .code(200)
-                .message("ok")
-                .build();
+    public APIResponse getCounts(SearchCondition condition) {
+        return generateResponse()
+                .setResult(boardService.getCountOfBoards(condition))
+                .setTimestamp(LocalDateTime.now());
     }
-
+// TODO: 게시글 수정에 들어가도 이 메소드가 실행되어 조회수가 올라간다.
     /**
      * boardId를 받아 해당 게시글의 정보를 boardDTO에 담아 반환한다.
      *
@@ -79,26 +75,75 @@ public class BoardController {
      * @return
      */
     @GetMapping("/board/detail/{id}")
-    public APIResponse<BoardDTO> getBoardDetail(@PathVariable("id") Long boardId) {
+    public APIResponse getBoardDetail(@PathVariable("id") Long boardId) {
         BoardDTO boardDetail = boardService.getBoardDetail(boardId);
+        if (boardDetail == null) throw new BoardValidationException(ResponseType.BOARD_NULL, LocalDateTime.now());
+        boardDetail.setFileDTOs(fileService.getFileNames(boardId));
         boardDetail.setCommentDTOs(commentService.getCommentDTOs(boardId));
+
         boardService.updateViews(boardId);
-        return APIResponse.<BoardDTO>builder()
-                .result(boardDetail)
-                .code(200)
-                .message("ok")
-                .build();
+
+        return generateResponse()
+                .setResult(boardDetail)
+                .setTimestamp(LocalDateTime.now());
     }
 
-//    TODO: result에 boardId 하나 넘기는 거 불편
+    /**
+     * boardCreateDTO에 있는 데이터를 기반으로 Board 레코드를, files에 있는 데이터를 기반으로 File 레코드를 생성한 후 파일을 로컬에 저장한다.
+     * 생성된 게시글의 primary key를 반환한다.
+     *
+     * @param boardCreateDTO 사용자가 입력한 게시글의 데이터가 담겨있는 객체
+     * @param files          사용자가 게시글에 업로드하고자 하는 파일 목록
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
     @PostMapping("/board/create")
     public APIResponse createBoard(@RequestPart("boardDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
         Long boardId = boardService.saveBoard(boardCreateDTO);
         fileService.saveFiles(files, boardId);
-        return APIResponse.builder()
-                .code(201)
-                .message("ok")
-                .result(boardId)
-                .build();
+        return generateResponse()
+                .setResult(boardId)
+                .setTimestamp(LocalDateTime.now());
+    }
+
+    /**
+     * boardId를 primary key로 갖고 있는 Board 레코드를 제거한다.
+     *
+     * @param boardId 삭제하고자 하는 게시글의 primary key
+     * @return
+     */
+    @DeleteMapping("/board/delete/{id}")
+    public APIResponse deleteBoard(@PathVariable("id") Long boardId, String password) throws NoSuchAlgorithmException {
+        if (!boardService.isRightPassword(password, boardId)) {
+            throw new BoardValidationException(ResponseType.PASSWORD_WRONG, LocalDateTime.now());
+        }
+        boardService.delete(boardId);
+        return generateResponse()
+                .setTimestamp(LocalDateTime.now());
+    }
+
+    /**
+     * boardId를 primary key로 갖고 있는 게시글의 비밀번호와 password가 일치한지 확인한다.
+     *
+     * @param boardId  게시글의 primary key
+     * @param password 확인될 password
+     * @return
+     */
+    @GetMapping("/board/password/{id}")
+    public APIResponse checkPassword(@PathVariable("id") Long boardId, String password) throws NoSuchAlgorithmException {
+        if (!boardService.isRightPassword(password, boardId)) {
+            throw new BoardValidationException(ResponseType.PASSWORD_WRONG, LocalDateTime.now());
+        }
+        return generateResponse()
+                .setTimestamp(LocalDateTime.now());
+    }
+
+    @PutMapping("/board/modify/{id}")
+    public APIResponse modifyBoard(@PathVariable("id") Long boardId, @RequestPart BoardDTO boardDTO) {
+        System.out.println("boardId = " + boardId);
+        System.out.println("boardDTO = " + boardDTO);
+        return generateResponse()
+                .setTimestamp(LocalDateTime.now());
     }
 }

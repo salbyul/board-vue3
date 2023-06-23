@@ -11,7 +11,7 @@ const condition = ref({});
 const counts = ref(0);
 const router = useRouter();
 
-const transferCreateView = () => {
+const transferToCreateView = () => {
   router.push({
     path: '/create',
     query: {
@@ -154,7 +154,7 @@ onBeforeMount(() => {
       <button
           type="button"
           class="px-5 bg-gray-200 rounded-sm duration-300 hover:duration-300 hover:bg-gray-300"
-          @click="transferCreateView"
+          @click="transferToCreateView"
       >
         등록
       </button>

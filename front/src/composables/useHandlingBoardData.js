@@ -36,6 +36,13 @@ export const verifyCreate = () => {
     return true
 }
 
+export const verifyModify = () => {
+    if (!verifyWriter()) return false;
+    if (!verifyTitle()) return false;
+    if (!verifyContent()) return false;
+    return true;
+}
+
 function verifyCategory() {
     console.log(category.value)
     if (category.value === '') {

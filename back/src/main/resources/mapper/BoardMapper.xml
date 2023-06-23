@@ -76,4 +76,10 @@
         FROM board
         WHERE board_id = #{boardId}
     </delete>
+
+    <select id="findPasswordByBoardId" resultType="String">
+        SELECT password
+        FROM board
+        WHERE board_id = #{boardId}
+    </select>
 </mapper>

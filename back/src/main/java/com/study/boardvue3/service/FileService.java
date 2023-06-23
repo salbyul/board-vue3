@@ -116,4 +116,14 @@ public class FileService {
         file.transferTo(new File(PATH + renamedName));
     }
 
+    /**
+     * boardId를 외래키로 갖고 있는 레코드들의 real_name과 primary key 리스트를 반환한다.
+     *
+     * @param boardId Board의 primary key
+     * @return
+     */
+    public List<FileDTO> getFileNames(Long boardId) {
+        return fileRepository.findFileNamesByBoardId(boardId);
+    }
+
 }

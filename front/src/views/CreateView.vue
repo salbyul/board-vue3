@@ -47,7 +47,12 @@ const submitBoard = async () => {
       }
     })
   } catch (error) {
+    //TODO: 에러처리???
     console.log(error)
+    const data = error.response.data;
+    if (data.error.code === '134') {
+      alert("비밀번호에는 영문, 숫자, 특수문자가 필수로 들어가야합니다.");
+    }
   }
 }
 

@@ -1,20 +1,23 @@
 package com.study.boardvue3.controller;
 
+import com.study.boardvue3.error.Error;
+import com.study.boardvue3.exception.BoardNullException;
 import com.study.boardvue3.exception.BoardValidationException;
 import com.study.boardvue3.response.ErrorResponse;
-import com.study.boardvue3.response.ResponseType;
-import com.study.boardvue3.validator.BoardValidationError;
+import com.study.boardvue3.error.BoardValidationError;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestControllerAdvice(basePackageClasses = {BoardController.class})
 public class BoardControllerAdvice {
 
@@ -26,7 +29,7 @@ public class BoardControllerAdvice {
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
-    public ErrorResponse unknownError(Exception e) {
+    public ErrorResponse<Error> unknownError(Exception e) {
         e.printStackTrace();
         return ErrorResponse.generateByUnknownError(LocalDateTime.now());
     }
@@ -39,8 +42,8 @@ public class BoardControllerAdvice {
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BoardValidationException.class)
-    public ErrorResponse handleBoardError(BoardValidationException e) {
-        log.error("error: {}", e.getErrors().stream().map(BoardValidationError::getMessage).collect(Collectors.toList()));
-        return ErrorResponse.generate(e.getTimestamp(), e.getErrors());
+    public ErrorResponse<Error> handleBoardError(BoardValidationException e) {
+        log.error("ERROR: [{}: {}]", e.getError().getField(), e.getError().getMessage());
+        return ErrorResponse.generateBoardResponse(e.getTimestamp(), e.getError());
     }
 }

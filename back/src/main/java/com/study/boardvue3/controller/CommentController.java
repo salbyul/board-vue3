@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
+import static com.study.boardvue3.response.APIResponse.*;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -26,9 +30,7 @@ public class CommentController {
     @PostMapping("/comment/save")
     public APIResponse saveComment(@RequestBody CommentDTO commentDTO) {
         commentService.saveCommentDTO(commentDTO);
-        return APIResponse.builder()
-                .code(201)
-                .message("ok")
-                .build();
+        return generateResponse()
+                .setTimestamp(LocalDateTime.now());
     }
 }
