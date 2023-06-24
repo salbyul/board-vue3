@@ -33,6 +33,8 @@ public enum ResponseType {
     CONTENT_SIZE("143", "Content", "길이 규정에 위반합니다."),
     CONTENT_NOT_NULL("142", "Content", "값이 null입니다."),
 
+    FILE_COUNT("156", "File", "파일은 총 3개까지 허용합니다."),
+
     UNKNOWN_ERROR("000", "Unknown", "알 수 없는 에러입니다.");
 
     private final String code;

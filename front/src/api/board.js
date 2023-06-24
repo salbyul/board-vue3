@@ -16,6 +16,10 @@ export function getBoardDetail(id) {
     return http.get(`/board/detail/${id}`);
 }
 
+export function getBoardDetailForModify(id) {
+    return http.get(`/board/modify/${id}`);
+}
+
 export function saveBoard(formData) {
     return http.post('/board/create', formData)
 }

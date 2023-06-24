@@ -1,6 +1,7 @@
 package com.study.boardvue3.controller;
 
 import com.study.boardvue3.dto.BoardDTO;
+import com.study.boardvue3.dto.FileDTO;
 import com.study.boardvue3.dto.SearchCondition;
 import com.study.boardvue3.exception.BoardValidationException;
 import com.study.boardvue3.response.APIResponse;
@@ -17,8 +18,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static com.study.boardvue3.dto.BoardDTO.*;
 import static com.study.boardvue3.response.APIResponse.*;
 
 @Slf4j
@@ -67,7 +68,7 @@ public class BoardController {
                 .setResult(boardService.getCountOfBoards(condition))
                 .setTimestamp(LocalDateTime.now());
     }
-// TODO: 게시글 수정에 들어가도 이 메소드가 실행되어 조회수가 올라간다.
+
     /**
      * boardId를 받아 해당 게시글의 정보를 boardDTO에 담아 반환한다.
      *
@@ -92,15 +93,15 @@ public class BoardController {
      * boardCreateDTO에 있는 데이터를 기반으로 Board 레코드를, files에 있는 데이터를 기반으로 File 레코드를 생성한 후 파일을 로컬에 저장한다.
      * 생성된 게시글의 primary key를 반환한다.
      *
-     * @param boardCreateDTO 사용자가 입력한 게시글의 데이터가 담겨있는 객체
-     * @param files          사용자가 게시글에 업로드하고자 하는 파일 목록
+     * @param boardDTO 사용자가 입력한 게시글의 데이터가 담겨있는 객체
+     * @param files    사용자가 게시글에 업로드하고자 하는 파일 목록
      * @return
      * @throws NoSuchAlgorithmException
      * @throws IOException
      */
     @PostMapping("/board/create")
-    public APIResponse createBoard(@RequestPart("boardDTO") BoardCreateDTO boardCreateDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
-        Long boardId = boardService.saveBoard(boardCreateDTO);
+    public APIResponse createBoard(@RequestPart BoardDTO boardDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+        Long boardId = boardService.saveBoard(boardDTO, files);
         fileService.saveFiles(files, boardId);
         return generateResponse()
                 .setResult(boardId)
@@ -115,9 +116,7 @@ public class BoardController {
      */
     @DeleteMapping("/board/delete/{id}")
     public APIResponse deleteBoard(@PathVariable("id") Long boardId, String password) throws NoSuchAlgorithmException {
-        if (!boardService.isRightPassword(password, boardId)) {
-            throw new BoardValidationException(ResponseType.PASSWORD_WRONG, LocalDateTime.now());
-        }
+        boardService.verifyPassword(password, boardId);
         boardService.delete(boardId);
         return generateResponse()
                 .setTimestamp(LocalDateTime.now());
@@ -132,17 +131,48 @@ public class BoardController {
      */
     @GetMapping("/board/password/{id}")
     public APIResponse checkPassword(@PathVariable("id") Long boardId, String password) throws NoSuchAlgorithmException {
-        if (!boardService.isRightPassword(password, boardId)) {
-            throw new BoardValidationException(ResponseType.PASSWORD_WRONG, LocalDateTime.now());
-        }
+        boardService.verifyPassword(password, boardId);
         return generateResponse()
                 .setTimestamp(LocalDateTime.now());
     }
 
+    /**
+     * 수정될 게시글의 데이터를 전송한다.
+     *
+     * @param boardId 수정될 게시글의 primary key
+     * @return
+     */
+    @GetMapping("/board/modify/{id}")
+    public APIResponse getDetailForModify(@PathVariable("id") Long boardId) {
+        BoardDTO boardDetail = boardService.getBoardDetail(boardId);
+        if (boardDetail == null) throw new BoardValidationException(ResponseType.BOARD_NULL, LocalDateTime.now());
+        boardDetail.setFileDTOs(fileService.getFileNames(boardId));
+
+        return generateResponse()
+                .setResult(boardDetail)
+                .setTimestamp(LocalDateTime.now());
+    }
+
+    /**
+     * boardId를 primary key로 갖는 게시글을 boardDTO에 담긴 데이터로 수정한다.
+     * 지워진 파일과 새로 업로드된 파일들을 로컬에 저장하고, DB에 반영한다.
+     *
+     * @param boardId  수정될 게시글의 primary key
+     * @param boardDTO 수정된 게시글의 데이터가 담긴 객체
+     * @param files    새로 업로드된 파일들
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws IOException
+     */
     @PutMapping("/board/modify/{id}")
-    public APIResponse modifyBoard(@PathVariable("id") Long boardId, @RequestPart BoardDTO boardDTO) {
-        System.out.println("boardId = " + boardId);
-        System.out.println("boardDTO = " + boardDTO);
+    public APIResponse modifyBoard(@PathVariable("id") Long boardId, @RequestPart BoardDTO boardDTO, @RequestPart(required = false) List<MultipartFile> files) throws NoSuchAlgorithmException, IOException {
+        boardService.verifyPassword(boardDTO.getPassword(), boardId);
+
+        boardService.modify(boardId, boardDTO, files);
+
+        List<String> realNames = boardDTO.getFileDTOs().stream().map(FileDTO::getRealName).collect(Collectors.toList());
+        fileService.removeFileByModification(boardId, realNames);
+        fileService.saveFiles(files, boardId);
         return generateResponse()
                 .setTimestamp(LocalDateTime.now());
     }

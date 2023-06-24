@@ -11,16 +11,21 @@ import {
   fileInput3,
   fileChange,
   verifyCreate,
-  makeFormData
+  makeFormData,
+  init
 } from "../composables/useHandlingBoardData";
 import {getCategories, saveBoard} from "../api/board";
 import {onBeforeMount, ref} from "vue";
 import {useRouter} from "vue-router";
 import {condition} from "../composables/useSearchCondition";
 
-const categories = ref([]);
 const router = useRouter();
+const categories = ref([]);
 
+/**
+ * 카테고리 목록을 요청한다.
+ * @returns {Promise<void>}
+ */
 const fetchCategories = async () => {
   try {
     const data = await getCategories();
@@ -30,6 +35,12 @@ const fetchCategories = async () => {
   }
 }
 
+/**
+ * 게시글 제출 메소드
+ * 게시글 데이터와 파일을 서버에 전송한다.
+ * 제출에 성공하면 생성된 게시글 detail 페이지로 이동한다.
+ * @returns {Promise<void>}
+ */
 const submitBoard = async () => {
   if (!verifyCreate()) return;
 
@@ -42,9 +53,7 @@ const submitBoard = async () => {
       params: {
         id: data.result
       },
-      query: {
-        condition: condition.value
-      }
+      query: condition.value
     })
   } catch (error) {
     //TODO: 에러처리???
@@ -57,6 +66,7 @@ const submitBoard = async () => {
 }
 
 onBeforeMount(() => {
+  init();
   fetchCategories();
 })
 </script>

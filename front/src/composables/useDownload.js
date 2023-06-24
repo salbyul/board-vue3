@@ -1,3 +1,7 @@
+/**
+ * 서버에서 전송된 파일을 다운로드한다.
+ * @param response
+ */
 export function useDownload(response) {
     console.log(response)
     const name = response.headers['content-disposition']

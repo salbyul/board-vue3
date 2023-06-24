@@ -7,17 +7,16 @@ import com.study.boardvue3.encoder.Encryptor;
 import com.study.boardvue3.exception.BoardValidationException;
 import com.study.boardvue3.repository.board.BoardRepository;
 import com.study.boardvue3.repository.file.FileRepository;
-import com.study.boardvue3.error.BoardValidationError;
+import com.study.boardvue3.response.ResponseType;
 import com.study.boardvue3.validator.BoardValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static com.study.boardvue3.dto.BoardDTO.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,7 +24,6 @@ import static com.study.boardvue3.dto.BoardDTO.*;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-    private final FileRepository fileRepository;
     private final Encryptor encryptor;
     private final BoardValidator boardValidator;
 
@@ -82,18 +80,18 @@ public class BoardService {
      * boardCreateDTO의 비밀번호를 SHA256 알고리즘으로 암호화한 후, 생성시각을 주입한다.
      * 그 후 Board 테이블에 저장한다.
      *
-     * @param boardCreateDTO 저장할 데이터가 담긴 객체
+     * @param boardDTO 저장할 데이터가 담긴 객체
      * @return 저장된 레코드의 primary key
      * @throws NoSuchAlgorithmException
      */
-    public Long saveBoard(BoardCreateDTO boardCreateDTO) throws NoSuchAlgorithmException {
-        boardValidator.validateBoardForSaving(boardCreateDTO);
+    public Long saveBoard(BoardDTO boardDTO, List<MultipartFile> files) throws NoSuchAlgorithmException {
+        boardValidator.validateForSaving(boardDTO, files);
 
-        String encryptedPassword = encryptor.encrypt(boardCreateDTO.getPassword());
-        boardCreateDTO.setEncryptedPassword(encryptedPassword);
-        boardCreateDTO.setGenerationTimestamp(LocalDateTime.now());
-        boardRepository.save(boardCreateDTO);
-        return boardCreateDTO.getBoardId();
+        String encryptedPassword = encryptor.encrypt(boardDTO.getPassword());
+        boardDTO.setEncryptedPassword(encryptedPassword);
+        boardDTO.setGenerationTimestamp(LocalDateTime.now());
+        boardRepository.save(boardDTO);
+        return boardDTO.getBoardId();
     }
 
     /**
@@ -104,10 +102,13 @@ public class BoardService {
      * @return
      * @throws NoSuchAlgorithmException
      */
-    public boolean isRightPassword(String password, Long boardId) throws NoSuchAlgorithmException {
+    public void verifyPassword(String password, Long boardId) throws NoSuchAlgorithmException {
+        if (password == null) throw new BoardValidationException(ResponseType.PASSWORD_NOT_NULL, LocalDateTime.now());
         String encryptedPassword = encryptor.encrypt(password);
         String foundPassword = boardRepository.findPasswordByBoardId(boardId);
-        return encryptedPassword.equals(foundPassword);
+        if (!encryptedPassword.equals(foundPassword)) {
+            throw new BoardValidationException(ResponseType.PASSWORD_WRONG, LocalDateTime.now());
+        }
     }
 
     /**
@@ -117,5 +118,20 @@ public class BoardService {
      */
     public void delete(Long boardId) {
         boardRepository.deleteBoardByBoardId(boardId);
+    }
+
+    /**
+     * 먼저 수정된 객체의 유효성 검사를 진행한다.
+     * boardDTO의 modificationTimestamp 속서에 현재 시각을 주입한 후
+     * boardId를 primary key로 갖는 게시글의 데이터를 수정한다.
+     *
+     * @param boardId  수정될 게시글의 primary key
+     * @param boardDTO 수정될 게시글의 데이터가 담긴 객체
+     * @param files    새로 업로드될 파일들
+     */
+    public void modify(Long boardId, BoardDTO boardDTO, List<MultipartFile> files) {
+        boardValidator.validateForModification(boardDTO, files);
+        boardDTO.setModificationTimestamp(LocalDateTime.now());
+        boardRepository.update(boardId, boardDTO);
     }
 }

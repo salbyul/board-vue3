@@ -1,5 +1,5 @@
 <script setup>
-import {startDate, endDate, categoryId, searchText, page, limit} from "../composables/useSearchCondition.js";
+import {condition} from "../composables/useSearchCondition.js";
 import {getCategories, getBoards, getBoardCounts} from "../api/board";
 import {onBeforeMount, ref} from "vue";
 import SmallBoard from "../components/SmallBoard.vue";
@@ -7,23 +7,23 @@ import {useRouter} from "vue-router";
 
 const categories = ref([]);
 const boards = ref({});
-const condition = ref({});
+const conditionForRequest = ref(Object.assign({limit: 10}, condition.value));
 const counts = ref(0);
 const router = useRouter();
 
+/**
+ * create 페이지로 이동하기 위한 메소드
+ */
 const transferToCreateView = () => {
   router.push({
     path: '/create',
-    query: {
-      startDate: condition.value.startDate,
-      endDate: condition.value.endDate,
-      category: condition.value.category,
-      search: condition.value.search,
-      page: condition.value.page
-    }
+    query: condition.value
   })
 }
-
+/**
+ * 카테고리 목록을 요청한다.
+ * @returns {Promise<void>}
+ */
 const fetchCategories = async () => {
   try {
     const data = await getCategories();
@@ -33,42 +33,53 @@ const fetchCategories = async () => {
   }
 }
 
+/**
+ * 검색조건을 이용해 게시글들을 요청한다.
+ * @returns {Promise<void>}
+ */
 const fetchBoards = async () => {
   try {
-    const data = await getBoards(condition.value);
+    const data = await getBoards(conditionForRequest.value);
     boards.value = data.result;
   } catch (error) {
     console.log(error)
   }
 }
 
+/**
+ * 검색조건을 이용해 게시글 수를 요청한다.
+ * @returns {Promise<void>}
+ */
 const fetchCounts = async () => {
   try {
-    const data = await getBoardCounts(condition.value);
+    const data = await getBoardCounts(conditionForRequest.value);
     counts.value = data.result;
   } catch (error) {
     console.log(error);
   }
 }
 
-const doSearch = () => {
-  fetchBoards();
-  fetchCounts();
+/**
+ * 검색 메소드
+ * 주소창에 쿼리를 추가한 후, 게시글과 게시글 수를 요청한다.
+ * @returns {Promise<void>}
+ */
+const doSearch = async () => {
+  await router.push({
+    name: 'list',
+    query: condition.value
+  })
+  conditionForRequest.value = Object.assign(Object.assign({limit: 10}, condition.value));
+  await fetchBoards();
+  await fetchCounts();
 }
 
 onBeforeMount(() => {
-  condition.value = {
-    startDate,
-    endDate,
-    categoryId,
-    searchText,
-    page,
-    limit
-  }
   fetchCategories();
   fetchBoards();
   fetchCounts();
 })
+
 </script>
 <template>
   <div class="mb-5 w-7/12 mx-auto">

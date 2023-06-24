@@ -15,6 +15,10 @@ const comment = ref({writer: '', content: ''})
 const passwordForDelete = ref('')
 const passwordForModify = ref('')
 
+/**
+ * id값을 이용해 게시글의 정보를 요청한다.
+ * @returns {Promise<void>}
+ */
 const fetchBoardDetail = async () => {
   const id = route.params.id
   try {
@@ -39,10 +43,16 @@ const fetchBoardDetail = async () => {
   }
 }
 
+/**
+ * 삭제 메소드
+ * 비밀번호를 확인한 후 올바른 비밀번호일 경우 list 페이지로 이동한다.
+ * @returns {Promise<void>}
+ */
 const fetchDelete = async () => {
   const id = route.params.id;
   try {
     await deleteBoard(id, passwordForDelete.value);
+    alert("삭제되었습니다.")
     await router.push({
       name: 'list',
       query: condition.value
@@ -55,6 +65,11 @@ const fetchDelete = async () => {
   }
 }
 
+/**
+ * 수정 위한 메소드
+ * 비밀번호를 확인한 후 올바른 비밀번호일 경우 modify 페이지로 이동한다.
+ * @returns {Promise<void>}
+ */
 const fetchModify = async () => {
   const id = route.params.id;
   try {
@@ -76,7 +91,10 @@ const fetchModify = async () => {
 
 }
 
-// TODO: 훅으로 빼자
+/**
+ * 수정과 삭제 버튼을 통한 비밀번호 입력창 레이어 토글을 위한 메소드
+ * @param btn 버튼 구분을 위한 string 값
+ */
 const changeVisibilityPopup = (btn) => {
   const modifyPopup = document.getElementById('modifyPopup')
   const deletePopup = document.getElementById('deletePopup')
@@ -99,6 +117,11 @@ const changeVisibilityPopup = (btn) => {
   }
 }
 
+/**
+ * 파일이름을 이용해 서버에 파일다운로드를 요청한다.
+ * @param fileName 파일 이름
+ * @returns {Promise<void>}
+ */
 const fetchDownloadFile = async (fileName) => {
   const id = route.params.id;
   try {
@@ -109,6 +132,11 @@ const fetchDownloadFile = async (fileName) => {
   }
 }
 
+/**
+ * 댓글 제출 메소드
+ * 댓글 제출에 성공하면 새로고침된다.
+ * @returns {Promise<void>}
+ */
 const submitComment = async () => {
   const commentDTO = {
     writer: comment.value.writer,
@@ -124,8 +152,11 @@ const submitComment = async () => {
   }
 }
 
-const transferToHome = () => {
-  router.push({
+/**
+ * list 페이지로 이동하기 위한 메소드
+ */
+const transferToHome = async () => {
+  await router.push({
     name: 'list',
     query: condition.value
   })
@@ -159,7 +190,7 @@ onBeforeMount(async () => {
 
       <!-- 파일 -->
       <div v-for="file in files" :key="file.fileId">
-        <a href="#" @click="fetchDownloadFile(file.fileName)">{{ file.fileName }}</a>
+        <a href="#" @click="fetchDownloadFile(file.realName)">{{ file.realName }}</a>
       </div>
     </div>
 
@@ -169,7 +200,9 @@ onBeforeMount(async () => {
         <div class="border-b-2 pb-2 mb-2">
           <div class="flex justify-between text-gray-600 text-xs">
             <div class="pl-3">{{ comment.writer }}</div>
-            <div class="pr-3">{{ comment.generationTimestamp }}</div>
+            <div class="pr-3">
+              {{ comment.generationTimestamp.substring(0, 10) + ' ' + comment.generationTimestamp.substring(11, 16) }}
+            </div>
           </div>
           <div class="pl-3 whitespace-pre-wrap">{{ comment.content }}</div>
         </div>

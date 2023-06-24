@@ -1,8 +1,13 @@
 <script setup>
 import {useRouter} from 'vue-router';
+
 const props = defineProps(['board', 'condition'])
 
 const router = useRouter();
+
+/**
+ * 해당 게시글의 detail 페이지로 이동한다.
+ */
 const transferDetail = () => {
   router.push({
     path: `/board/${props.board.boardId}`,

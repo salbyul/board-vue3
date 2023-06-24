@@ -4,7 +4,6 @@ import DetailView from '../views/DetailView.vue'
 import CreateView from '../views/CreateView.vue'
 import ModifyView from '../views/ModifyView.vue'
 
-// TODO: 검색조건 전역 쿼리 전달 추가해야 함!
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [

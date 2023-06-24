@@ -82,4 +82,13 @@
         FROM board
         WHERE board_id = #{boardId}
     </select>
+
+    <update id="update">
+        UPDATE board
+        SET writer = #{boardDTO.writer},
+            title = #{boardDTO.title},
+            content = #{boardDTO.content},
+            modified_date = #{boardDTO.modificationTimestamp}
+        WHERE board_id = #{boardId}
+    </update>
 </mapper>

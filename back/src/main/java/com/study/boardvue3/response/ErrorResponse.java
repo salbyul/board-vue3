@@ -15,7 +15,6 @@ public class ErrorResponse<T extends Error> {
     private final LocalDateTime timestamp;
     private final T error;
 
-
     public static ErrorResponse<Error> generateBoardResponse(LocalDateTime timestamp, Error error) {
         return new ErrorResponse<>(timestamp, error);
     }

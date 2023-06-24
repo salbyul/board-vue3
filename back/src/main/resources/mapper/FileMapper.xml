@@ -5,7 +5,7 @@
 <mapper namespace="com.study.boardvue3.repository.file.FileMapper">
 
     <select id="findFileNamesByBoardId" resultType="FileDTO">
-        SELECT real_name AS fileName, file_id AS fileId
+        SELECT real_name AS realName, file_id AS fileId
         FROM file
         where board_id = #{boardId}
     </select>
@@ -20,4 +20,26 @@
         INSERT INTO file (name, real_name, board_id)
         VALUES (#{fileName}, #{realName}, #{boardId})
     </insert>
+
+    <delete id="deleteFileByRealNameAndBoardId">
+        DELETE
+        FROM file
+        WHERE board_id = #{boardId}
+        AND real_name IN
+        <foreach collection="fileNames" item="fileName" index="index" open="(" close=")" separator=",">
+            #{fileName}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByBoardId">
+        DELETE
+        FROM file
+        WHERE board_id = #{boardId}
+    </delete>
+
+    <select id="countFilesByBoardId" resultType="Integer">
+        SELECT count(file_id)
+        FROM file
+        WHERE board_id = #{boardId}
+    </select>
 </mapper>

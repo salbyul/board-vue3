@@ -3,7 +3,6 @@ package com.study.boardvue3.exception;
 import com.study.boardvue3.error.BoardValidationError;
 import com.study.boardvue3.response.ResponseType;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 

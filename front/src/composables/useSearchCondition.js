@@ -5,10 +5,12 @@ const endDate = ref('');
 const categoryId = ref('');
 const searchText = ref('');
 const page = ref('');
-const limit = ref('10');
 
 const params = new URLSearchParams(location.search);
 
+/**
+ * QueryString 값을 해당 값들에 주입한다.
+ */
 const conditionInit = () => {
     if (params.has('startDate')) {
         startDate.value = params.get('startDate');
@@ -24,11 +26,11 @@ const conditionInit = () => {
         newEndDate.setDate(newEndDate.getDate() + 1);
         endDate.value = makeDate(newEndDate);
     }
-    if (params.has('search')) {
-        searchText.value = params.get('search');
+    if (params.has('searchText')) {
+        searchText.value = params.get('searchText');
     }
-    if (params.has('category')) {
-        categoryId.value = params.get('category');
+    if (params.has('categoryId')) {
+        categoryId.value = params.get('categoryId');
     }
     if (params.has('page')) {
         page.value = params.get('page');
@@ -37,6 +39,11 @@ const conditionInit = () => {
     }
 }
 
+/**
+ * yyyy-MM-dd 형태의 String으로 만들어 반환한다.
+ * @param date Date 객체
+ * @returns {string}
+ */
 const makeDate = (date) => {
     const yyyy = date.getFullYear();
     const mm = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1)
@@ -51,7 +58,5 @@ export const condition = ref({
     endDate: endDate.value,
     categoryId: categoryId.value,
     searchText: searchText.value,
-    page: page.value
+    page: page.value,
 })
-
-export {startDate, endDate, categoryId, searchText, page, limit}
